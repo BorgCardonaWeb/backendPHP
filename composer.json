@@ -1,0 +1,21 @@
+{
+    "name": "borgcardona/gardeningmalta",
+    "description": "Gardening Malta Backend",
+    "require-dev": {
+        "phpmailer/phpmailer": "^6.9",
+        "firebase/php-jwt": "^6.10"
+    },
+    "autoload": {
+        "psr-4": {
+            "Borgcardona\\Gardeningmalta\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "XiomaraPulidoDev"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    }
+}
