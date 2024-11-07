@@ -129,7 +129,7 @@ if ($requestMethod === 'POST') {
             $productId = $matches[1];
             echo json_encode($productController->getProductById($productId));
             break;
-        case '/products/banners':
+        case '/products/allBannerImages':
             echo json_encode($productController->getAllBannerImages());
             break;
 
