@@ -13,7 +13,6 @@ class ProductController {
         try {
             $products = $this->productModel->getProducts();
     
-            // Procesar las imágenes y convertirlas a base64 solo si existen
             $processedProducts = array_map(function($product) {
                 if (isset($product['image']) && $product['image']) {
                     $product['image'] = base64_encode($product['image']);
@@ -31,16 +30,14 @@ class ProductController {
     
 public function getProductsByFilter($data) {
     try {
-        $filter = $data['filter'] ?? '';  // Obtén el filtro desde el cuerpo de la solicitud
+        $filter = $data['filter'] ?? '';  
 
         if (empty($filter)) {
             return ['status' => 400, 'message' => 'Filter parameter is required'];
         }
 
-        // Obtener los productos filtrados
         $products = $this->productModel->getProductsByFilter($filter);
 
-        // Procesar los productos (por ejemplo, codificando la imagen en base64)
         $processedProducts = array_map(function($product) {
             if ($product['image']) {
                 $product['image'] = base64_encode($product['image']);
@@ -48,7 +45,7 @@ public function getProductsByFilter($data) {
             return $product;
         }, $products);
 
-        return ['status' => 200, 'products' => $processedProducts];  // Retorna los productos procesados
+        return ['status' => 200, 'products' => $processedProducts]; 
     } catch (Exception $e) {
         return ['status' => 500, 'message' => 'Failed to fetch filtered products: ' . $e->getMessage()];
     }
@@ -72,62 +69,50 @@ public function getProductsByFilter($data) {
         }
     }
     
-    public function getProductsByIds($request, $response) {
+    public function getProductsByIds($data) {
         try {
-            $data = $request->getParsedBody();
-            $productIds = $data['productIds'] ?? [];
-
+            $productIds = $data['productIds'] ?? []; 
+    
             if (!is_array($productIds) || empty($productIds)) {
-                return $response->withStatus(400)->write('Product IDs array is required and should not be empty');
+                return ['status' => 400, 'message' => 'Product IDs array is required and should not be empty'];
             }
-
+    
             $products = $this->productModel->getProductsByIds($productIds);
-
+    
             $processedProducts = array_map(function($product) {
                 if ($product['image']) {
                     $product['image'] = base64_encode($product['image']);
                 }
                 return $product;
             }, $products);
-
-            return $response->withJson($processedProducts);
+    
+            return $processedProducts;
         } catch (Exception $e) {
-            return $response->withStatus(500)->write('Failed to fetch products by IDs: ' . $e->getMessage());
+            return ['status' => 500, 'message' => 'Failed to fetch products by IDs: ' . $e->getMessage()];
         }
     }
 
-    public function getAllProducts($request, $response) {
+
+    public function getFilteredProducts($data) {
         try {
-            $products = $this->productModel->getAllProducts();
-
-            $processedProducts = array_map(function($product) {
-                if ($product['image']) {
-                    $product['image'] = base64_encode($product['image']);
-                }
-                return $product;
-            }, $products);
-
-            return $response->withJson($processedProducts);
-        } catch (Exception $e) {
-            return $response->withStatus(500)->write('Failed to fetch all products: ' . $e->getMessage());
-        }
-    }
-
-    public function getFilteredProducts($request, $response) {
-        try {
-            $filters = $request->getParsedBody();
+            $filters = $data;
+    
+            if (empty($filters)) {
+                return ['status' => 400, 'message' => 'Filters are required'];
+            }
+    
             $products = $this->productModel->getFilteredProducts($filters);
-
+    
             $processedProducts = array_map(function($product) {
                 if ($product['image']) {
                     $product['image'] = base64_encode($product['image']);
                 }
                 return $product;
             }, $products);
-
-            return $response->withJson($processedProducts);
+    
+            return $processedProducts;
         } catch (Exception $e) {
-            return $response->withStatus(500)->write('Failed to retrieve filtered products: ' . $e->getMessage());
+            return ['status' => 500, 'message' => 'Failed to retrieve filtered products: ' . $e->getMessage()];
         }
     }
 

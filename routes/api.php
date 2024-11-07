@@ -6,8 +6,13 @@ require_once __DIR__ . '/../controllers/AuthAdminController.php';
 require_once __DIR__ . '/../controllers/CategoryController.php';
 require_once __DIR__ . '/../controllers/OrderController.php';
 require_once __DIR__ . '/../controllers/ProductController.php';
-
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../controllers/StockController.php';
+
+$apiKey = 'd9ffc251-925e-410b-8b41-86a16319585e';
+$companyKey = '001';
+
+$stockController = new StockController($apiKey, $companyKey);
 
 $authController = new AuthController($db);
 $authAdminController = new AuthAdminController($db);
@@ -18,6 +23,7 @@ $productController = new ProductController($db);
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = str_replace("/gardeningMaltaBackend", "", $path);
+
 
 if ($requestMethod === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
@@ -69,11 +75,22 @@ if ($requestMethod === 'POST') {
         case '/products':
             echo json_encode($productController->createProduct($data));
             break;
-            case '/products/filterParam':
-                echo json_encode($productController->getProductsByFilter($data)); 
-                break;
+        case '/products/filterParam':
+            echo json_encode($productController->getProductsByFilter($data)); 
+            break;
         case '/products/banner':
             echo json_encode($productController->insertImageBanner($data));
+            break;
+        case '/products/byIds':
+            echo json_encode($productController->getProductsByIds($data)); 
+            break;
+        case '/products/filter':
+            echo json_encode($productController->getFilteredProducts($data));  
+            break;
+
+        // Stock
+        case '/stock/getStockDetails':
+            echo json_encode($stockController->getStockDetails($data)); 
             break;
 
         default:
@@ -107,10 +124,6 @@ if ($requestMethod === 'POST') {
         case (preg_match('/^\/products\/subcategory\/(\d+)$/', $path, $matches) ? true : false):
             $subcategoryId = $matches[1];
             echo json_encode($productController->getProductsBySubcategory($subcategoryId));
-            break;
-        case (preg_match('/^\/products\/ids\/(.+)$/', $path, $matches) ? true : false):
-            $productIds = explode(',', $matches[1]);
-            echo json_encode($productController->getProductsByIds($productIds));
             break;
         case (preg_match('/^\/products\/(\d+)$/', $path, $matches) ? true : false):
             $productId = $matches[1];
