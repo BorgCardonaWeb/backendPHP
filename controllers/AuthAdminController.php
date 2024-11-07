@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../models/UserModel.php';
+require_once __DIR__ . '/../models/UserAdminModel.php';
 require_once __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../middlewares/AuthMiddleware.php';
 require_once __DIR__ . '/../config/mailer.php';
@@ -9,25 +9,25 @@ use Firebase\JWT\JWT;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-class AuthController
+class AuthAdminController
 {
-    private $userModel;
+    private $userAdminModel;
 
     public function __construct($db)
     {
-        $this->userModel = new UserModel($db);
+        $this->userAdminModel = new UserAdminModel($db);
     }
 
     public function register($userData)
     {
         $userData['password'] = password_hash($userData['password'], PASSWORD_BCRYPT);
-        $this->userModel->create($userData);
+        $this->userAdminModel->create($userData);
         return ['message' => 'User registered successfully'];
     }
 
     public function login($email, $password)
     {
-        $user = $this->userModel->findByEmail($email);
+        $user = $this->userAdminModel->findByEmail($email);
         if ($user && password_verify($password, $user['password'])) {
             $token = JWT::encode(['id' => $user['id'], 'email' => $user['email']], 'your_jwt_secret', 'HS256');
             return ['token' => $token];
@@ -44,7 +44,7 @@ class AuthController
             return json_encode(['message' => 'Email is required']);
         }
 
-        $user = $this->userModel->findByEmail($email);
+        $user = $this->userAdminModel->findByEmail($email);
         if (!$user) {
             return json_encode(['message' => 'User not found']);
         }

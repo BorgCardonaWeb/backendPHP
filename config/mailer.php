@@ -8,41 +8,39 @@ class Mailer {
     private $mail;
 
     public function __construct() {
-        $this->mail = new PHPMailer(true); // Instanciar PHPMailer
+        $this->mail = new PHPMailer(true); 
 
-        // Configuración del servidor SMTP
-        $this->mail->isSMTP(); // Configurar para usar SMTP
-        $this->mail->Host = 'smtp.openxchange.eu'; // Cambia esto si es necesario
-        $this->mail->SMTPAuth = true; // Habilitar autenticación SMTP
-        $this->mail->Username = getenv('SMTP2GO_USER'); // Usuario SMTP
-        $this->mail->Password = getenv('SMTP2GO_PASSWORD'); // Contraseña SMTP
-        $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; // Habilitar el cifrado TLS
-        $this->mail->Port = 587; // Puerto TCP para conectarse
+       
+        $this->mail->isSMTP();
+        $this->mail->Host = 'smtp.openxchange.eu'; 
+        $this->mail->SMTPAuth = true; 
+        $this->mail->Username = getenv('SMTP2GO_USER'); 
+        $this->mail->Password = getenv('SMTP2GO_PASSWORD'); 
+        $this->mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS; 
+        $this->mail->Port = 587; 
 
-        // Activar el debug para ver más detalles si hay errores
-        $this->mail->SMTPDebug = 0; // Cambia el valor a 2 para mostrar más detalles en los logs
+       
+        $this->mail->SMTPDebug = 0; 
     }
 
     public function send($from, $to, $subject, $body) {
         try {
-            // Configurar destinatario
-            $this->mail->setFrom($from, 'Gardening Malta'); // Remitente
-            $this->mail->addAddress($to); // Añadir destinatario
+            
+            $this->mail->setFrom($from, 'Gardening Malta'); 
+            $this->mail->addAddress($to); 
 
-            // Contenido del correo
-            $this->mail->isHTML(true); // Configurar el formato del correo como HTML
-            $this->mail->Subject = $subject; // Asunto del correo
-            $this->mail->Body = $body; // Cuerpo del correo
+            $this->mail->isHTML(true); 
+            $this->mail->Subject = $subject; 
+            $this->mail->Body = $body; 
 
             if ($this->mail->send()) {
-                return true; // Indicar que el correo se envió correctamente
+                return true; 
             } else {
-                throw new Exception('No se pudo enviar el correo');
+                throw new Exception('Could not send email');
             }
         } catch (Exception $e) {
-            // Capturar los errores y devolver el mensaje de error
-            echo 'Error en el envío del correo: ' . $e->getMessage();
-            return false; // Indicar que hubo un error al enviar el correo
+            echo 'Could not send email: ' . $e->getMessage();
+            return false;
         }
     }
 }
