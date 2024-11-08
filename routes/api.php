@@ -47,19 +47,19 @@ if ($requestMethod === 'POST') {
             break;
 
         // Autenticación de administrador
-        case '/admin/auth/register':
+        case '/admin-auth/register':
             echo json_encode($authAdminController->register($data));
             break;
-        case '/admin/auth/login':
+        case '/admin-auth/login':
             echo json_encode($authAdminController->login($data['email'], $data['password']));
             break;
-        case '/admin/auth/forgot-password':
+        case '/admin-auth/forgot-password':
             echo json_encode($authAdminController->forgotPassword($data['email']));
             break;
-        case '/admin/auth/reset-password':
+        case '/admin-auth/reset-password':
             echo json_encode($authAdminController->resetPassword($data['email'], $data['newPassword']));
             break;
-        case '/admin/auth/update-user':
+        case '/admin-auth/update-user':
             echo json_encode($authAdminController->updateUser($data));
             break;
 
