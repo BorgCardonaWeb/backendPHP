@@ -132,6 +132,10 @@ if ($requestMethod === 'POST') {
         case '/products/allBannerImages':
             echo json_encode($productController->getAllBannerImages());
             break;
+        case (preg_match('/^\/auth\/user\/(\d+)$/', $path, $matches) ? true : false):
+            $id = $matches[1];  // Captura el ID de la URL
+            echo json_encode($authAdminController->getAdminUserById($id));
+        break;
 
         default:
             http_response_code(404);
@@ -144,6 +148,10 @@ if ($requestMethod === 'POST') {
         case (preg_match('/^\/products\/(\d+)$/', $path, $matches) ? true : false):
             $productId = $matches[1];
             echo json_encode($productController->updateProduct($productId, $data));
+            break;
+        case (preg_match('/^\/orders\/(\d+)$/', $path, $matches) ? true : false):
+            $orderId = $matches[1]; 
+            echo json_encode($orderController->updateOrder($orderId, $data));
             break;
         default:
             http_response_code(404);

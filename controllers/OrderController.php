@@ -34,12 +34,18 @@ class OrderController {
     public function getOrderById($orderId) {
         try {
             $order = $this->orderModel->getOrderById($orderId);
+    
+            if (isset($order['arrayProduct'])) {
+                $order['arrayProduct'] = json_decode($order['arrayProduct'], true);
+            }
+    
             return $order;
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode(['message' => 'Failed to retrieve order: ' . $e->getMessage()]);
         }
     }
+    
 
     public function getAllOrders() {
         try {

@@ -26,14 +26,18 @@ class AuthAdminController
     }
 
     public function login($email, $password)
-    {
-        $user = $this->userAdminModel->findByEmail($email);
-        if ($user && password_verify($password, $user['password'])) {
-            $token = JWT::encode(['id' => $user['id'], 'email' => $user['email']], 'your_jwt_secret', 'HS256');
-            return ['token' => $token];
-        }
-        return ['message' => 'Invalid credentials'];
+{
+    $user = $this->userAdminModel->findByEmail($email);
+    if ($user && password_verify($password, $user['password'])) {
+        $token = JWT::encode(['id' => $user['id'], 'email' => $user['email']], 'your_jwt_secret', 'HS256');
+        return [
+            'token' => $token,
+            'adminUser' => $user  // Aquí se incluye la información del usuario
+        ];
     }
+    return ['message' => 'Invalid credentials'];
+}
+
 
     public function forgotPassword()
     {
@@ -67,5 +71,20 @@ class AuthAdminController
 			return json_encode(['message' => 'Error sending email']);
 		}
 
+    }
+    public function getAdminUserById($id) {
+        try {
+            $adminUser = $this->userAdminModel->findById($id);
+
+            if ($adminUser) {
+                return $adminUser;
+            } else {
+                http_response_code(404);
+                return ['message' => 'Admin user not found'];
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            return ['message' => 'Failed to retrieve admin user: ' . $e->getMessage()];
+        }
     }
 }
