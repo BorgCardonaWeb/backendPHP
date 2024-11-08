@@ -6,4 +6,13 @@ RewriteRule ^(.*)$ routes/api.php [QSA,L]
     Header always set Access-Control-Allow-Origin "*"
     Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
     Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+    Header always set Access-Control-Max-Age "3600"
 </IfModule>
+<IfModule mod_rewrite.c>
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteRule ^(.*)$ - [R=200,L]
+</IfModule>
+<Limit OPTIONS>
+    Order Allow,Deny
+    Allow from all
+</Limit>

@@ -63,14 +63,40 @@ class OrderController {
     }
 
     public function getFilteredOrders() {
-        $filters = json_decode(file_get_contents("php://input"), true);
+        // Decodificar los filtros recibidos en la solicitud
+        $filters = json_decode(file_get_contents("php://input"), true);  
+    
         try {
+            // Obtener las órdenes filtradas desde el modelo
             $orders = $this->orderModel->getFilteredOrders($filters);
-            return $orders;
+            
+            // Eliminar valores nulos en el array
+            $orders = array_map(function($order) {
+                return array_filter($order, function($value) {
+                    return $value !== null;
+                });
+            }, $orders);
+    
+            // Establecer el encabezado de tipo de contenido como JSON
+            header('Content-Type: application/json');
+    
+            // Devolver las órdenes como JSON sin codificar doblemente
+            echo json_encode($orders);
+            exit; // Finalizar el script para evitar salida extra
+    
         } catch (Exception $e) {
+            // En caso de error, devolver un mensaje de error en formato JSON
             http_response_code(500);
             echo json_encode(['message' => 'Failed to retrieve filtered orders: ' . $e->getMessage()]);
+            exit;
         }
     }
+    
+    
+    
+    
+    
+    
+       
 }
 ?>

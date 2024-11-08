@@ -86,30 +86,31 @@ class OrderModel {
     public function getFilteredOrders($filters) {
         $whereClauses = [];
         $values = [];
-
-        if (isset($filters['status'])) {
+    
+        if (!empty($filters['status'])) {
             $whereClauses[] = "Status = ?";
             $values[] = $filters['status'];
         }
-        if (isset($filters['paymentType'])) {
+        if (!empty($filters['paymentType'])) {
             $whereClauses[] = "PaymentType = ?";
             $values[] = $filters['paymentType'];
         }
-        if (isset($filters['date'])) {
+        if (!empty($filters['date'])) {
             $whereClauses[] = "Date = ?";
             $values[] = $filters['date'];
         }
-        if (isset($filters['id'])) {
+        if (!empty($filters['id'])) {
             $whereClauses[] = "OrderID LIKE ?";
             $values[] = "%" . $filters['id'] . "%";
         }
-
-        $whereSQL = $whereClauses ? "WHERE " . implode(" AND ", $whereClauses) : "";
+    
+        $whereSQL = count($whereClauses) ? "WHERE " . implode(" AND ", $whereClauses) : "";
         $sql = "SELECT * FROM orders $whereSQL ORDER BY Date DESC, OrderID DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute($values);
-
+    
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
 }
 ?>
