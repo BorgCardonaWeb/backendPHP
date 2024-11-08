@@ -46,8 +46,7 @@ class CategoryController
                 }
             }
 
-            header('Content-Type: application/json');
-            echo json_encode($categories);
+            return $categories;
 
         } catch (Exception $e) {
             error_log("Error fetching categories: " . $e->getMessage());

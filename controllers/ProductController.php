@@ -27,6 +27,34 @@ class ProductController {
         }
     }
 
+    public function getAllBannerImages() {
+        try {
+            // Obtiene las imágenes desde la base de datos
+            $images = $this->productModel->getAllBannerImages();
+    
+            // Procesa cada imagen convirtiéndola de binario a Base64
+            $processedImages = array_map(function($data) {
+                if ($data['image']) {
+                    // Convierte el binario a Base64
+                    $data['image'] = base64_encode($data['image']);
+                }
+                return $data;
+            }, $images);
+    
+            // Configura el encabezado para JSON y retorna la respuesta
+            header("Content-Type: application/json");
+            echo json_encode($processedImages);
+            exit; // Termina el script después de enviar la respuesta
+    
+        } catch (Exception $e) {
+            // Retorna un error en formato JSON también
+            http_response_code(500);
+            echo json_encode(['error' => 'Failed to fetch banner images: ' . $e->getMessage()]);
+            exit;
+        }
+    }
+    
+
     
 public function getProductsByFilter($data) {
     try {
@@ -170,23 +198,6 @@ public function getProductsByFilter($data) {
             return $response->withStatus(201)->withJson($newImage);
         } catch (Exception $e) {
             return $response->withStatus(500)->write('Failed to insert image: ' . $e->getMessage());
-        }
-    }
-
-    public function getAllBannerImages($request, $response) {
-        try {
-            $images = $this->productModel->getAllBannerImages();
-
-            $processedImages = array_map(function($data) {
-                if ($data['image']) {
-                    $data['image'] = base64_encode($data['image']);
-                }
-                return $data;
-            }, $images);
-
-            return $response->withJson($processedImages);
-        } catch (Exception $e) {
-            return $response->withStatus(500)->write('Failed to fetch banner images: ' . $e->getMessage());
         }
     }
 
