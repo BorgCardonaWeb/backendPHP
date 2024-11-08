@@ -27,6 +27,24 @@ class ProductController {
         }
     }
 
+    public function getAllProducts() {
+        try {
+            $products = $this->productModel->getAllProducts();
+    
+            $processedProducts = array_map(function($product) {
+                if (isset($product['image']) && $product['image']) {
+                    $product['image'] = base64_encode($product['image']);
+                }
+                return $product;
+            }, $products);
+    
+            return $processedProducts;
+        } catch (Exception $error) {
+            error_log("Error fetching products: " . $error->getMessage());
+            return ['error' => 'Failed to fetch products: ' . $error->getMessage()];
+        }
+    }
+
     public function getAllBannerImages() {
         try {
             // Obtiene las imágenes desde la base de datos
@@ -183,31 +201,23 @@ public function getProductsByFilter($data) {
         }
     }
 
-    public function insertImageBanner($request, $response) {
+    public function insertImageBanner($data) {
         try {
-            $imgData = $request->getParsedBody();
-
-            if ($request->getUploadedFiles() && isset($request->getUploadedFiles()['image'])) {
-                $imageFile = $request->getUploadedFiles()['image'];
-                if ($imageFile->getError() === UPLOAD_ERR_OK) {
-                    $imgData['image'] = file_get_contents($imageFile->file);
-                }
+            // Verifica si los datos de la imagen se están enviando correctamente como binarios
+            if (isset($data['image']) && is_string($data['image'])) {
+                // La imagen se envía como un binario en un string, se puede pasar al modelo
+                return $this->productModel->insertImageBanner($data); 
+            } else {
+                throw new Exception('No image data or incorrect format.');
             }
-
-            $newImage = $this->productModel->insertImageBanner($imgData);
-            return $response->withStatus(201)->withJson($newImage);
         } catch (Exception $e) {
-            return $response->withStatus(500)->write('Failed to insert image: ' . $e->getMessage());
+            return ['error' => $e->getMessage()];
         }
     }
-
-    public function deleteImage($request, $response, $args) {
-        try {
-            $imageId = $args['imageId'];
-            $result = $this->productModel->deleteImageById($imageId);
-            return $response->withJson($result);
-        } catch (Exception $e) {
-            return $response->withStatus(500)->write('Failed to delete image: ' . $e->getMessage());
-        }
+    
+    
+    public function deleteImageById($imageId) {
+        $result = $this->productModel->deleteImageById($imageId);
+        return $result;
     }
 }

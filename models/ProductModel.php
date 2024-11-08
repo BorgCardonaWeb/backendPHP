@@ -19,6 +19,17 @@ class ProductModel {
         }
     }
 
+    public function getAllProducts() {
+        try {
+            $stmt = $this->db->prepare("SELECT * FROM products ORDER BY ProductID DESC");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            throw new Exception('Failed to fetch products: ' . $e->getMessage());
+        }
+    }
+    
+
     public function getProductsByFilter($filter) {
         try {
             $escapedFilter = '%' . str_replace("'", "''", urldecode($filter)) . '%';
@@ -155,10 +166,16 @@ class ProductModel {
 
     public function insertImageBanner($imageData) {
         try {
+            // Preparar la consulta SQL para insertar la imagen
             $stmt = $this->db->prepare("INSERT INTO images (image) VALUES (?)");
+
+            // Ejecutar la consulta con los datos recibidos
             $stmt->execute([$imageData['image']]);
+
+            // Retornar el ID de la imagen recién insertada junto con los datos
             return ['id' => $this->db->lastInsertId()] + $imageData;
         } catch (Exception $e) {
+            // Si ocurre un error, lanzar una excepción con el mensaje de error
             throw new Exception('Failed to create image banner: ' . $e->getMessage());
         }
     }
@@ -175,13 +192,18 @@ class ProductModel {
 
     public function deleteImageById($imageId) {
         try {
+            // Preparar la consulta SQL para eliminar la imagen
             $stmt = $this->db->prepare("DELETE FROM images WHERE id = ?");
             $stmt->execute([$imageId]);
-            if ($stmt->rowCount() === 0) {
-                throw new Exception('Image not found');
+
+            // Verificar si se eliminó correctamente
+            if ($stmt->rowCount() > 0) {
+                return ['message' => 'Image deleted successfully'];
+            } else {
+                return ['error' => 'Image not found'];
             }
-            return ['message' => 'Image deleted successfully'];
         } catch (Exception $e) {
+            // Si ocurre un error, lanzar una excepción con el mensaje de error
             throw new Exception('Failed to delete image: ' . $e->getMessage());
         }
     }

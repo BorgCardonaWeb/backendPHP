@@ -24,78 +24,93 @@ $requestMethod = $_SERVER['REQUEST_METHOD'];
 $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $path = str_replace("/gardeningMaltaBackend", "", $path);
 
-
 if ($requestMethod === 'POST') {
-    $data = json_decode(file_get_contents('php://input'), true);
-
-    switch ($path) {
-        // Autenticación de usuario
-        case '/auth/register':
-            echo json_encode($authController->register($data));
-            break;
-        case '/auth/login':
-            echo json_encode($authController->login($data['email'], $data['password']));
-            break;
-        case '/auth/forgot-password':
-            echo json_encode($authController->forgotPassword($data['email']));
-            break;
-        case '/auth/reset-password':
-            echo json_encode($authController->resetPassword($data['email'], $data['newPassword']));
-            break;
-        case '/auth/update-user':
-            echo json_encode($authController->updateUser($data));
-            break;
-
-        // Autenticación de administrador
-        case '/admin-auth/register':
-            echo json_encode($authAdminController->register($data));
-            break;
-        case '/admin-auth/login':
-            echo json_encode($authAdminController->login($data['email'], $data['password']));
-            break;
-        case '/admin-auth/forgot-password':
-            echo json_encode($authAdminController->forgotPassword($data['email']));
-            break;
-        case '/admin-auth/reset-password':
-            echo json_encode($authAdminController->resetPassword($data['email'], $data['newPassword']));
-            break;
-        case '/admin-auth/update-user':
-            echo json_encode($authAdminController->updateUser($data));
-            break;
-
-        // Órdenes
-        case '/orders/create':
-            echo json_encode($orderController->createOrder($data));
-            break;
-        case '/orders/filter':
-            echo json_encode($orderController->getFilteredOrders($data));
-            break;
-
-        // Productos
-        case '/products':
-            echo json_encode($productController->createProduct($data));
-            break;
-        case '/products/filterParam':
-            echo json_encode($productController->getProductsByFilter($data)); 
-            break;
-        case '/products/banner':
+    // Para la carga de imágenes, se debe usar $_FILES en lugar de json_decode
+    if ($path === '/products/banner') {
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            // Leer la imagen en formato binario
+            $imageData = file_get_contents($_FILES['image']['tmp_name']);
+            
+            // Crear un arreglo con los datos de la imagen
+            $data = [
+                'image' => $imageData
+            ];
+            
+            // Pasar los datos al controlador
             echo json_encode($productController->insertImageBanner($data));
-            break;
-        case '/products/byIds':
-            echo json_encode($productController->getProductsByIds($data)); 
-            break;
-        case '/products/filter':
-            echo json_encode($productController->getFilteredProducts($data));  
-            break;
+        } else {
+            echo json_encode(['error' => 'No image file uploaded or error during upload']);
+        }
+    } else {
+        // Otras rutas POST que usan JSON
+        $data = json_decode(file_get_contents('php://input'), true);
 
-        // Stock
-        case '/stock/getStockDetails':
-            echo json_encode($stockController->getStockDetails($data)); 
-            break;
+        switch ($path) {
+            // Autenticación de usuario
+            case '/auth/register':
+                echo json_encode($authController->register($data));
+                break;
+            case '/auth/login':
+                echo json_encode($authController->login($data['email'], $data['password']));
+                break;
+            case '/auth/forgot-password':
+                echo json_encode($authController->forgotPassword($data['email']));
+                break;
+            case '/auth/reset-password':
+                echo json_encode($authController->resetPassword($data['email'], $data['newPassword']));
+                break;
+            case '/auth/update-user':
+                echo json_encode($authController->updateUser($data));
+                break;
 
-        default:
-            http_response_code(404);
-            echo json_encode(['message' => 'Route not found']);
+            // Autenticación de administrador
+            case '/admin-auth/register':
+                echo json_encode($authAdminController->register($data));
+                break;
+            case '/admin-auth/login':
+                echo json_encode($authAdminController->login($data['email'], $data['password']));
+                break;
+            case '/admin-auth/forgot-password':
+                echo json_encode($authAdminController->forgotPassword($data['email']));
+                break;
+            case '/admin-auth/reset-password':
+                echo json_encode($authAdminController->resetPassword($data['email'], $data['newPassword']));
+                break;
+            case '/admin-auth/update-user':
+                echo json_encode($authAdminController->updateUser($data));
+                break;
+
+            // Órdenes
+            case '/orders/create':
+                echo json_encode($orderController->createOrder($data));
+                break;
+            case '/orders/filter':
+                echo json_encode($orderController->getFilteredOrders($data));
+                break;
+
+            // Productos
+            case '/products':
+                echo json_encode($productController->createProduct($data));
+                break;
+            case '/products/filterParam':
+                echo json_encode($productController->getProductsByFilter($data)); 
+                break;
+            case '/products/byIds':
+                echo json_encode($productController->getProductsByIds($data)); 
+                break;
+            case '/products/filter':
+                echo json_encode($productController->getFilteredProducts($data));  
+                break;
+
+            // Stock
+            case '/stock/getStockDetails':
+                echo json_encode($stockController->getStockDetails($data)); 
+                break;
+
+            default:
+                http_response_code(404);
+                echo json_encode(['message' => 'Route not found']);
+        }
     }
 } elseif ($requestMethod === 'GET') {
     switch ($path) {
@@ -120,6 +135,9 @@ if ($requestMethod === 'POST') {
         // Productos
         case '/products':
             echo json_encode($productController->getProducts()); 
+            break;
+        case '/Allproducts':
+            echo json_encode($productController->getAllProducts()); 
             break;
         case (preg_match('/^\/products\/subcategory\/(\d+)$/', $path, $matches) ? true : false):
             $subcategoryId = $matches[1];
@@ -161,7 +179,7 @@ if ($requestMethod === 'POST') {
     switch (true) {
         case (preg_match('/^\/products\/banner\/(\d+)$/', $path, $matches) ? true : false):
             $imageId = $matches[1];
-            echo json_encode($productController->deleteImage($imageId));
+            echo json_encode($productController->deleteImageById($imageId)); 
             break;
         default:
             http_response_code(404);
