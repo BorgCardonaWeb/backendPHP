@@ -180,20 +180,9 @@ public function getProductsByFilter($data) {
         }
     }
     
-
-    public function createProduct($request, $response) {
+    public function createProduct($data) {
         try {
-            $productData = $request->getParsedBody();
-
-            if ($request->getUploadedFiles() && isset($request->getUploadedFiles()['image'])) {
-                $imageFile = $request->getUploadedFiles()['image'];
-                if ($imageFile->getError() === UPLOAD_ERR_OK) {
-                    $productData['image'] = file_get_contents($imageFile->file);
-                }
-            }
-
-            $newProduct = $this->productModel->createProduct($productData);
-            return $response->withStatus(201)->withJson($newProduct);
+            return $this->productModel->createProduct($data); 
         } catch (Exception $e) {
             return $response->withStatus(500)->write('Failed to create product: ' . $e->getMessage());
         }
@@ -213,6 +202,19 @@ public function getProductsByFilter($data) {
         }
     }
     
+    public function updateProductImage($data) {
+        try {
+            // Verifica si los datos de la imagen se están enviando correctamente como binarios
+            if (isset($data['image']) && is_string($data['image'])) {
+                // La imagen se envía como un binario en un string, se puede pasar al modelo
+                return $this->productModel->updateProductImage($data); 
+            } else {
+                throw new Exception('No image data or incorrect format.');
+            }
+        } catch (Exception $e) {
+            return ['error' => $e->getMessage()];
+        }
+    }
     
     public function deleteImageById($imageId) {
         $result = $this->productModel->deleteImageById($imageId);

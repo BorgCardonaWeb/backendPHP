@@ -28,16 +28,32 @@ if ($requestMethod === 'POST') {
     // Para la carga de imágenes, se debe usar $_FILES en lugar de json_decode
     if ($path === '/products/banner') {
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            // Leer la imagen en formato binario
+            
             $imageData = file_get_contents($_FILES['image']['tmp_name']);
             
-            // Crear un arreglo con los datos de la imagen
             $data = [
                 'image' => $imageData
             ];
             
-            // Pasar los datos al controlador
             echo json_encode($productController->insertImageBanner($data));
+        } else {
+            echo json_encode(['error' => 'No image file uploaded or error during upload']);
+        }
+    } elseif (preg_match('/^\/products\/banner\/(\d+)$/', $path, $matches)) {
+        
+        $productId = $matches[1];  // Obtener el id del producto desde la URL
+
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            // Obtener los datos de la imagen cargada
+            $imageData = file_get_contents($_FILES['image']['tmp_name']);
+            
+            $data = [
+                'image' => $imageData,
+                'productId' => $productId  // Incluir el id en los datos
+            ];
+
+            // Llamar al controlador para actualizar la imagen del producto
+            echo json_encode($productController->updateProductImage($data));
         } else {
             echo json_encode(['error' => 'No image file uploaded or error during upload']);
         }
@@ -89,7 +105,7 @@ if ($requestMethod === 'POST') {
                 break;
 
             // Productos
-            case '/products':
+            case '/products/create':
                 echo json_encode($productController->createProduct($data));
                 break;
             case '/products/filterParam':

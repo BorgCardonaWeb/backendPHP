@@ -176,6 +176,23 @@ class ProductModel {
         }
     }
 
+    public function updateProductImage($imageData) {
+        try {
+            $stmt = $this->db->prepare("UPDATE products SET image = ? WHERE ProductID = ?");
+    
+            $stmt->execute([$imageData['image'], $imageData['productId']]);
+    
+            if ($stmt->rowCount() > 0) {
+                return ['success' => true, 'message' => 'Product image updated successfully'];
+            } else {
+                return ['success' => false, 'message' => 'Product not found or no changes made'];
+            }
+        } catch (Exception $e) {
+            throw new Exception('Failed to update product image: ' . $e->getMessage());
+        }
+    }
+    
+
     public function getAllBannerImages() {
         try {
             $stmt = $this->db->prepare("SELECT * FROM images");
