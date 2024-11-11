@@ -19,17 +19,6 @@ class ProductModel {
         }
     }
 
-    public function getAllProducts() {
-        try {
-            $stmt = $this->db->prepare("SELECT * FROM products ORDER BY ProductID DESC");
-            $stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        } catch (Exception $e) {
-            throw new Exception('Failed to fetch products: ' . $e->getMessage());
-        }
-    }
-    
-
     public function getProductsByFilter($filter) {
         try {
             $escapedFilter = '%' . str_replace("'", "''", urldecode($filter)) . '%';
@@ -97,26 +86,33 @@ class ProductModel {
     }
 
     public function updateProduct($productId, $updatedData) {
+        if (!isset($updatedData['name'], $updatedData['description'], $updatedData['shortDescription'], $updatedData['active'])) {
+            throw new Exception('Missing required fields');
+        }
+    
         try {
-            $stmt = $this->db->prepare("UPDATE products SET name = ?, description = ?, shortDescription = ?, active = ?, image = ? WHERE ProductID = ?");
+
+            $stmt = $this->db->prepare("UPDATE products SET name = ?, description = ?, shortDescription = ?, active = ? WHERE ProductID = ?");
+
             $stmt->execute([
                 $updatedData['name'],
                 $updatedData['description'],
                 $updatedData['shortDescription'],
                 $updatedData['active'],
-                $updatedData['image'],
                 $productId
             ]);
-
+    
             if ($stmt->rowCount() === 0) {
                 throw new Exception('Product not found or no changes made');
             }
-
-            return ['productId' => $productId] + $updatedData;
+    
+            return ['success' => true, 'message' => 'Product updated successfully'];
         } catch (Exception $e) {
-            throw new Exception('Failed to update product: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Failed to update product: ' . $e->getMessage()];
         }
     }
+    
+    
 
     public function createProduct($productData) {
         try {

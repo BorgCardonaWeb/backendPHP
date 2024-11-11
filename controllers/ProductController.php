@@ -162,26 +162,24 @@ public function getProductsByFilter($data) {
         }
     }
 
-    public function updateProduct($request, $response, $args) {
+    public function updateProduct($productId) {
+        $updatedData = json_decode(file_get_contents("php://input"), true);
+    
+        error_log(print_r($updatedData, true)); 
+    
+        if ($updatedData === null) {
+            return ['success' => false, 'message' => 'Invalid or empty data received'];
+        }
+    
         try {
-            $productId = $args['productId'];
-            $updatedData = $request->getParsedBody();
-
-            $updatedData['active'] = isset($updatedData['active']) && $updatedData['active'] === '1' ? 1 : 0;
-
-            if ($request->getUploadedFiles() && isset($request->getUploadedFiles()['image'])) {
-                $imageFile = $request->getUploadedFiles()['image'];
-                if ($imageFile->getError() === UPLOAD_ERR_OK) {
-                    $updatedData['image'] = file_get_contents($imageFile->file);
-                }
-            }
-
-            $updatedProduct = $this->productModel->updateProduct($productId, $updatedData);
-            return $response->withJson($updatedProduct);
+            $updatedOrder = $this->productModel->updateProduct($productId, $updatedData);
+            return $updatedOrder;
         } catch (Exception $e) {
-            return $response->withStatus(500)->write('Failed to update product: ' . $e->getMessage());
+            http_response_code(500);
+            return ['success' => false, 'message' => 'Failed to update product: ' . $e->getMessage()];
         }
     }
+    
 
     public function createProduct($request, $response) {
         try {
