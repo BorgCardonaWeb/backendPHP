@@ -73,7 +73,7 @@ if ($requestMethod === 'POST') {
                 echo json_encode($authController->forgotPassword($data['email']));
                 break;
             case '/auth/reset-password':
-                echo json_encode($authController->resetPassword($data['email'], $data['newPassword']));
+                echo json_encode($authController->resetPassword($data['token'], $data['newPassword']));
                 break;
             case '/auth/update-user':
                 echo json_encode($authController->updateUser($data));
@@ -89,9 +89,10 @@ if ($requestMethod === 'POST') {
             case '/admin-auth/forgot-password':
                 echo json_encode($authAdminController->forgotPassword($data['email']));
                 break;
-            case '/admin-auth/reset-password':
-                echo json_encode($authAdminController->resetPassword($data['email'], $data['newPassword']));
-                break;
+                case '/admin-auth/reset-password':
+                    echo json_encode($authAdminController->resetPassword($data['email'], $data['newPassword']));
+                    break;
+
             case '/admin-auth/update-user':
                 echo json_encode($authAdminController->updateUser($data));
                 break;
@@ -187,6 +188,13 @@ if ($requestMethod === 'POST') {
             $orderId = $matches[1]; 
             echo json_encode($orderController->updateOrder($orderId, $data));
             break;
+        
+          // Ruta de usuarios (actualización)
+        case (preg_match('/^\/auth\/users\/(\d+)$/', $path, $matches) ? true : false):
+            $userId = $matches[1];
+            echo json_encode($authController->updateUser($userId, $data));
+            break;
+
         default:
             http_response_code(404);
             echo json_encode(['message' => 'Route not found']);

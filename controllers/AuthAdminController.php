@@ -32,10 +32,11 @@ class AuthAdminController
         $token = JWT::encode(['id' => $user['id'], 'email' => $user['email']], 'your_jwt_secret', 'HS256');
         return [
             'token' => $token,
-            'adminUser' => $user  // Aquí se incluye la información del usuario
+            'adminUser' => $user  
         ];
     }
-    return ['message' => 'Invalid credentials'];
+    http_response_code(401);
+    return ['error' => 'Invalid credentials'];
 }
 
 
