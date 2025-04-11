@@ -21,9 +21,10 @@ class ProductModel {
 
     public function getProductsByFilter($filter) {
         try {
+            $filter = trim($filter);
             $escapedFilter = '%' . str_replace("'", "''", urldecode($filter)) . '%';
-            $stmt = $this->db->prepare("SELECT * FROM products WHERE name LIKE ? AND active = TRUE");
-            $stmt->execute([$escapedFilter]);
+            $stmt = $this->db->prepare("SELECT * FROM products WHERE (name LIKE ? OR sku LIKE ?) AND active = TRUE");
+            $stmt->execute([$escapedFilter, $escapedFilter]);
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             throw new Exception('Failed to fetch products by filter: ' . $e->getMessage());

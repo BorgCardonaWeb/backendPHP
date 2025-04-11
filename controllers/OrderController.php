@@ -2,6 +2,13 @@
 // controllers/OrderController.php
 
 require_once __DIR__ . '/../models/OrderModel.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../middlewares/AuthMiddleware.php';
+require_once __DIR__ . '/../config/mailer.php';
+
+use Firebase\JWT\JWT;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
 class OrderController {
     private $orderModel;
@@ -13,13 +20,47 @@ class OrderController {
     public function createOrder() {
         $orderData = json_decode(file_get_contents("php://input"), true);
         try {
+            // Crear la orden
             $newOrder = $this->orderModel->createOrder($orderData);
+            $orderId = $newOrder['OrderID']; 
+    
+            // Configuración del correo
+            $mailOptions = [
+                'from' => 'infogardeningmalta@gardeningmalta.com.mt',
+                'subject' => 'New Order Received',
+                'text' => "A new order has been received - Order ID: $orderId"
+            ];
+    
+            // Lista de destinatarios
+            $recipients = [
+                'nigel@borgcardona.com.mt',
+                'nicole@borgcardona.com.mt',
+                'xiomaraa.pulido@gmail.com',
+                'JONAS@borgcardona.com.mt',
+                'marketing@borgcardona.com.mt',
+                'andrew@borgcardona.com.mt',
+                'web@borgcardona.com.mt'
+            ];
+    
+     
+            foreach ($recipients as $recipient) {
+                $mailer = new Mailer();  
+                
+                if (method_exists($mailer, 'clear')) {
+                    $mailer->clear();  
+                }
+                
+                // Enviar el correo
+                $mailer->send($mailOptions['from'], $recipient, $mailOptions['subject'], $mailOptions['text']);
+            }
+    
             return $newOrder;
         } catch (Exception $e) {
             http_response_code(500);
             echo json_encode(['message' => 'Failed to create order: ' . $e->getMessage()]);
         }
     }
+    
 
     public function getOrdersByClientId($clientId) {
         try {
@@ -97,12 +138,6 @@ class OrderController {
             exit;
         }
     }
-    
-    
-    
-    
-    
-    
        
 }
 ?>

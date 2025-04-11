@@ -65,8 +65,8 @@ class AuthController
         // Generar el JWT con el algoritmo 'HS256'
         $token = JWT::encode($payload, $secretKey, 'HS256');
 
-        // Construir el enlace de restablecimiento de contraseña con el JWT
-        $resetLink = "http://localhost:4200/reset-password?token=$token";
+        // Construir el enlace de restablecimiento de contraseña con el JWT 
+        $resetLink = "https://gardeningmalta.com.mt/reset-password?token=$token";
 
         // Configurar los detalles del correo
         $mailOptions = [
