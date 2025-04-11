@@ -138,12 +138,6 @@ class OrderController {
             exit;
         }
     }
-    
-    
-    
-    
-    
-    
        
 }
 ?>
