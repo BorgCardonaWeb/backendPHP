@@ -55,7 +55,7 @@ class AuthAdminController
         }
 
         $token = bin2hex(random_bytes(50));
-        $resetLink = "http://localhost:4200/reset-password?token=$token";
+        $resetLink = "https://gardeningmalta.com.mt/reset-password?token=$token";
 
         $mailOptions = [
             'from' => 'infogardeningmalta@gardeningmalta.com.mt',

@@ -90,7 +90,7 @@ if ($requestMethod === 'POST') {
                 echo json_encode($authAdminController->forgotPassword($data['email']));
                 break;
                 case '/admin-auth/reset-password':
-                    echo json_encode($authAdminController->resetPassword($data['email'], $data['newPassword']));
+                    echo json_encode($authAdminController->resetPassword($data['token'], $data['newPassword']));
                     break;
 
             case '/admin-auth/update-user':
