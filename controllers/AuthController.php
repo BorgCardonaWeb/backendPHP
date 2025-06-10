@@ -21,9 +21,21 @@ class AuthController
 
     public function register($userData)
     {
-        $userData['password'] = password_hash($userData['password'], PASSWORD_BCRYPT);
-        $this->userModel->create($userData);
-        return ['message' => 'User registered successfully'];
+        try {
+            // Validar si el email ya existe
+            if ($this->userModel->emailExists($userData['email'])) {
+                http_response_code(400);
+                return ['error' => 'Email already registered'];
+            }
+
+            // Continúa con el registro
+            $userData['password'] = password_hash($userData['password'], PASSWORD_BCRYPT);
+            $this->userModel->create($userData);
+            return ['message' => 'User registered successfully'];
+        } catch (Exception $ex) {
+            http_response_code(500);
+            return ['error' => $ex->getMessage()];
+        }
     }
 
     public function login($email, $password)
@@ -33,7 +45,7 @@ class AuthController
             $token = JWT::encode(['id' => $user['id'], 'email' => $user['email']], 'your_jwt_secret', 'HS256');
             return [
                 'token' => $token,
-                'user' => $user  
+                'user' => $user
             ];
         }
         http_response_code(401);
@@ -52,14 +64,14 @@ class AuthController
         }
 
         // Generar el token JWT
-        $secretKey = getenv('JWT_SECRET'); 
-        $issuedAt = time();  
-        $expirationTime = $issuedAt + 3600;  
+        $secretKey = getenv('JWT_SECRET');
+        $issuedAt = time();
+        $expirationTime = $issuedAt + 3600;
         $payload = [
-            'iss' => 'infogardeningmalta@gardeningmalta.com.mt',  
-            'sub' => $user['id'],  
-            'iat' => $issuedAt,    
-            'exp' => $expirationTime  
+            'iss' => 'infogardeningmalta@gardeningmalta.com.mt',
+            'sub' => $user['id'],
+            'iat' => $issuedAt,
+            'exp' => $expirationTime
         ];
 
         // Generar el JWT con el algoritmo 'HS256'
@@ -75,7 +87,7 @@ class AuthController
             'subject' => 'Password Reset',
             'text' => "Click the following link to reset your password: $resetLink"
         ];
-        
+
         // Enviar el correo
         $mailer = new Mailer();
 
@@ -119,15 +131,16 @@ class AuthController
         }
     }
 
-    public function updateUser($userId) {
+    public function updateUser($userId)
+    {
         $updatedData = json_decode(file_get_contents("php://input"), true);
-    
-        error_log(print_r($updatedData, true)); 
-    
+
+        error_log(print_r($updatedData, true));
+
         if ($updatedData === null) {
             return ['success' => false, 'message' => 'Invalid or empty data received'];
         }
-    
+
         try {
             $result = $this->userModel->updateUser($userId, $updatedData);
             return $result;
